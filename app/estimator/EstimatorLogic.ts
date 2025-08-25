@@ -1,76 +1,28 @@
 // EstimatorLogic.ts
 
 export type Inputs = {
-  // Either provide area directly OR len_ft & wid_ft (area will be computed if not given)
-  area_sqft?: number;
-  len_ft?: number;
-  wid_ft?: number;
-
-  tile_value: string;          // e.g., "600x600" (matches tile-sizes.json `value`)
-  tile_price_each: number;     // LKR per tile (your estimator.js uses per tile price)
-  skirting_len_ft?: number;    // if empty -> defaults to ceil(20% of area)
-  user_labor_rate_sqft?: number; // overrides min/max if > 0
-};
-
-export type TileSize = {
-  label: string;
-  value: string;          // unique key ("600x600")
-  width: number;          // inches (for display only)
-  height: number;         // inches (for display only)
-  sqft: number;           // sqft per tile
-  laborMin: number;       // LKR / sqft
-  laborMax: number;       // LKR / sqft
-  skirtingCoverage: number; // linear feet covered by one tile laid as skirting
-};
-
-export type MaterialBreakdown = {
-  cementMin_bags: number;
-  cementMax_bags: number;
-  cementMin_cost: number;
-  cementMax_cost: number;
-
-  sandMin_cubes: number;
-  sandMax_cubes: number;
-  sandMin_cost: number;
-  sandMax_cost: number;
-
-  adhesiveMin_bags: number;
-  adhesiveMax_bags: number;
-  adhesiveMin_cost: number;
-  adhesiveMax_cost: number;
-
-  clips_qty: number;
-  clips_cost: number;
-
-  grout_kg: number;
-  grout_cost: number;
-
-  tiles_total_qty: number;
-  tiles_cost: number;
-};
-
-export type LaborBreakdown = {
-  floorLaborMin: number;
-  floorLaborMax: number;
-  skirtingLaborMin: number;
-  skirtingLaborMax: number;
-  laborMin: number;
-  laborMax: number;
+  area_sqft: number;
+  tile_value: string;            // e.g., "600x600"
+  tile_price_each: number;       // LKR per tile
+  skirting_len_ft?: number;      // optional; default = ceil(20% of area)
+  user_labor_rate_sqft?: number; // optional override
+  wastage_pct?: number;          // optional; default 5
 };
 
 export type Report = {
-  // Summary
   area_sqft: number;
   skirting_len_ft: number;
   tile_label: string;
-  tile_value: string;
 
-  // Quantities
+  // Tile quantities
   floor_tiles: number;
   skirting_tiles: number;
-  total_tiles: number; // includes 5% wastage
+  base_tiles: number;           // floor + skirting (before wastage)
+  wastage_pct: number;
+  wastage_tiles: number;        // ceil(base * pct)
+  total_tiles: number;          // base + wastage
 
-  // Costs
+  // Costs (summary)
   materialsMin: number;
   materialsMax: number;
   laborMin: number;
@@ -78,23 +30,31 @@ export type Report = {
   totalMin: number;
   totalMax: number;
 
-  // Detailed breakdowns
-  materials: MaterialBreakdown;
-  labor: LaborBreakdown;
+  // Tile cost breakdown
+  tile_cost_per_piece: number;
+  tile_cost_floor_only: number;   // floor_tiles * price
+  tile_cost_skirting_only: number;// skirting_tiles * price
+  tile_cost_wastage_only: number; // wastage_tiles * price
+  tile_cost_total: number;        // total_tiles * price
 };
 
-// =======================
-// Tunable price constants
-// =======================
+type TileSize = {
+  label: string;
+  value: string;
+  sqft: number;
+  laborMin: number;
+  laborMax: number;
+  skirtingCoverage: number;
+};
+
 const PRICE = {
-  cementBag50kg: 1900, // LKR
+  cementBag50kg: 1900,
   sandCube: 25000,
   adhesive25kg: 2200,
   clipsPer100: 1500,
   groutPerKg: 300,
 };
 
-// Safe helpers
 const safe = (n: unknown, fb = 0) => (Number.isFinite(Number(n)) ? Number(n) : fb);
 const pos = (n: unknown, fb = 0) => {
   const v = safe(n, fb);
@@ -102,98 +62,64 @@ const pos = (n: unknown, fb = 0) => {
 };
 
 export function computeReport(inp: Inputs, sizes: { tileSizes: TileSize[] }): Report {
-  // Find selected tile settings
-  const all = sizes?.tileSizes ?? [];
-  const selected = all.find((t) => t.value === inp.tile_value) ?? all[0];
-  if (!selected) {
-    throw new Error("No tile sizes available.");
-  }
+  const selected = sizes.tileSizes.find(t => t.value === inp.tile_value) ?? sizes.tileSizes[0];
+  if (!selected) throw new Error("No tile sizes found");
 
-  // Area (sqft)
-  const area_from_len_wid =
-    pos(inp.len_ft, 0) > 0 && pos(inp.wid_ft, 0) > 0 ? pos(inp.len_ft) * pos(inp.wid_ft) : 0;
-  const area = +(pos(inp.area_sqft, area_from_len_wid)).toFixed(2);
+  const area = pos(inp.area_sqft, 0);
+  if (area <= 0) throw new Error("Area must be > 0");
 
-  if (area <= 0) {
-    throw new Error("Area must be > 0 (provide area or length × width).");
-  }
-
-  // Skirting default (20% of area) if not provided
-  const userSkirting = pos(inp.skirting_len_ft, NaN);
-  const skirting_len_ft =
-    Number.isFinite(userSkirting) && userSkirting > 0 ? Math.ceil(userSkirting) : Math.ceil(area * 0.2);
-
-  // Tiles
+  const skirting = pos(inp.skirting_len_ft, Math.ceil(area * 0.2));
   const perTileSqft = pos(selected.sqft, 0);
+
   const floorTiles = perTileSqft > 0 ? Math.ceil(area / perTileSqft) : 0;
+  const skirtingTiles = Math.ceil(skirting / Math.max(1, pos(selected.skirtingCoverage, 1)));
 
-  const skirtingCoverage = Math.max(1, pos(selected.skirtingCoverage, 1)); // avoid /0
-  const skirtingTiles = Math.ceil(skirting_len_ft / skirtingCoverage);
+  const baseTiles = floorTiles + skirtingTiles;
 
-  // 5% wastage (your file)
-  const totalTiles = Math.ceil((floorTiles + skirtingTiles) * 1.05);
+  const wastage_pct = pos(inp.wastage_pct, 5); // default 5%
+  const wastageTiles = Math.ceil(baseTiles * (wastage_pct / 100));
+  const totalTiles = baseTiles + wastageTiles;
 
-  // Tile price: your estimator.js uses "tilePrice" as price per tile
   const tilePriceEach = pos(inp.tile_price_each, 0);
-  const tiles_cost = totalTiles * tilePriceEach;
+  const tile_cost_floor_only = floorTiles * tilePriceEach;
+  const tile_cost_skirting_only = skirtingTiles * tilePriceEach;
+  const tile_cost_wastage_only = wastageTiles * tilePriceEach;
+  const tile_cost_total = totalTiles * tilePriceEach;
 
-  // Floor bed & tiling materials (same formulas you used)
-  const cementMin_bags = Math.ceil((8 * area) / 800);
-  const cementMax_bags = Math.ceil((8 * area) / 600);
-  const cementMin_cost = cementMin_bags * PRICE.cementBag50kg;
-  const cementMax_cost = cementMax_bags * PRICE.cementBag50kg;
+  // Floor bed & consumables
+  const cementMin = Math.ceil((8 * area) / 800);
+  const cementMax = Math.ceil((8 * area) / 600);
+  const cementMinCost = cementMin * PRICE.cementBag50kg;
+  const cementMaxCost = cementMax * PRICE.cementBag50kg;
 
-  const sandMin_cubes = Math.round((area / 800) * 4) / 4; // to nearest 0.25
-  const sandMax_cubes = Math.round((area / 600) * 4) / 4;
-  const sandMin_cost = sandMin_cubes * PRICE.sandCube;
-  const sandMax_cost = sandMax_cubes * PRICE.sandCube;
+  const sandMin = Math.round((area / 800) * 4) / 4;
+  const sandMax = Math.round((area / 600) * 4) / 4;
+  const sandMinCost = sandMin * PRICE.sandCube;
+  const sandMaxCost = sandMax * PRICE.sandCube;
 
-  const adhesiveMin_bags = Math.ceil(area / 40);
-  const adhesiveMax_bags = Math.ceil(area / 30);
-  const adhesiveMin_cost = adhesiveMin_bags * PRICE.adhesive25kg;
-  const adhesiveMax_cost = adhesiveMax_bags * PRICE.adhesive25kg;
+  const adhesiveMin = Math.ceil(area / 40);
+  const adhesiveMax = Math.ceil(area / 30);
+  const adhesiveMinCost = adhesiveMin * PRICE.adhesive25kg;
+  const adhesiveMaxCost = adhesiveMax * PRICE.adhesive25kg;
 
-  const clips_qty = Math.ceil(area / 100); // packs of 100 pcs
-  const grout_kg = Math.ceil(area / 175);
-  const clips_cost = clips_qty * PRICE.clipsPer100;
-  const grout_cost = grout_kg * PRICE.groutPerKg;
+  const clips = Math.ceil(area / 100);
+  const grout = Math.ceil(area / 175);
+  const clipsCost = clips * PRICE.clipsPer100;
+  const groutCost = grout * PRICE.groutPerKg;
 
   const materialsMin =
-    tiles_cost +
-    cementMin_cost +
-    sandMin_cost +
-    adhesiveMin_cost +
-    clips_cost +
-    grout_cost;
-
+    tile_cost_total + cementMinCost + sandMinCost + adhesiveMinCost + clipsCost + groutCost;
   const materialsMax =
-    tiles_cost +
-    cementMax_cost +
-    sandMax_cost +
-    adhesiveMax_cost +
-    clips_cost +
-    grout_cost;
+    tile_cost_total + cementMaxCost + sandMaxCost + adhesiveMaxCost + clipsCost + groutCost;
 
   // Labor
+  let laborMin: number, laborMax: number;
   const userLabor = pos(inp.user_labor_rate_sqft, 0);
-  const useDefaultLabor = !(userLabor > 0);
-
-  const laborMinRate = selected.laborMin;
-  const laborMaxRate = selected.laborMax;
-
-  let floorLaborMin: number, floorLaborMax: number, skirtingLaborMin: number, skirtingLaborMax: number, laborMin: number, laborMax: number;
-
-  if (useDefaultLabor) {
-    floorLaborMin = area * laborMinRate;
-    floorLaborMax = area * laborMaxRate;
-    skirtingLaborMin = skirting_len_ft * laborMinRate;
-    skirtingLaborMax = skirting_len_ft * laborMaxRate;
-    laborMin = floorLaborMin + skirtingLaborMin;
-    laborMax = floorLaborMax + skirtingLaborMax;
+  if (userLabor > 0) {
+    laborMin = laborMax = (area + skirting) * userLabor;
   } else {
-    floorLaborMin = floorLaborMax = area * userLabor;
-    skirtingLaborMin = skirtingLaborMax = skirting_len_ft * userLabor;
-    laborMin = laborMax = floorLaborMin + skirtingLaborMin;
+    laborMin = area * selected.laborMin + skirting * selected.laborMin;
+    laborMax = area * selected.laborMax + skirting * selected.laborMax;
   }
 
   const totalMin = materialsMin + laborMin;
@@ -201,12 +127,14 @@ export function computeReport(inp: Inputs, sizes: { tileSizes: TileSize[] }): Re
 
   return {
     area_sqft: area,
-    skirting_len_ft,
+    skirting_len_ft: skirting,
     tile_label: selected.label,
-    tile_value: selected.value,
 
     floor_tiles: floorTiles,
     skirting_tiles: skirtingTiles,
+    base_tiles: baseTiles,
+    wastage_pct,
+    wastage_tiles: wastageTiles,
     total_tiles: totalTiles,
 
     materialsMin,
@@ -216,33 +144,10 @@ export function computeReport(inp: Inputs, sizes: { tileSizes: TileSize[] }): Re
     totalMin,
     totalMax,
 
-    materials: {
-      cementMin_bags,
-      cementMax_bags,
-      cementMin_cost,
-      cementMax_cost,
-      sandMin_cubes,
-      sandMax_cubes,
-      sandMin_cost,
-      sandMax_cost,
-      adhesiveMin_bags,
-      adhesiveMax_bags,
-      adhesiveMin_cost,
-      adhesiveMax_cost,
-      clips_qty,
-      clips_cost,
-      grout_kg,
-      grout_cost,
-      tiles_total_qty: totalTiles,
-      tiles_cost,
-    },
-    labor: {
-      floorLaborMin,
-      floorLaborMax,
-      skirtingLaborMin,
-      skirtingLaborMax,
-      laborMin,
-      laborMax,
-    },
+    tile_cost_per_piece: tilePriceEach,
+    tile_cost_floor_only,
+    tile_cost_skirting_only,
+    tile_cost_wastage_only,
+    tile_cost_total,
   };
 }
