@@ -1,0 +1,10 @@
+.wrap{position:relative}
+.scroller{display:grid;grid-auto-flow:column;grid-auto-columns:100%;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:16px;scrollbar-width:none}
+.scroller::-webkit-scrollbar{display:none}
+.slide{position:relative;height:min(46vw,420px);scroll-snap-align:start;border-radius:16px;overflow:hidden;background:#e9eef5}
+.overlay{position:absolute;inset:auto 0 0 0;padding:16px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.45));color:#fff}
+.overlay h2{margin:0 0 4px;font-size:clamp(18px,3vw,28px)}
+.overlay p{margin:0 0 10px;opacity:.9}
+.cta{display:inline-block;background:#fff;color:#111;font-weight:800;padding:10px 14px;border-radius:10px;text-decoration:none}
+.controls{position:absolute;inset:auto 10px 10px auto;display:flex;gap:8px}
+.controls button{width:36px;height:36px;border-radius:50%;border:0;cursor:pointer;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.15);font-size:18px}
