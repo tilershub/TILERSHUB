@@ -106,3 +106,28 @@ input:focus, select:focus, textarea:focus{
 /* Utility: hide the old fieldset lines that look broken on iOS */
 fieldset{border:none; padding:0; margin:0}
 legend{display:none}
+
+/* ============================
+   MOBILE UTILITIES (edge-to-edge & denser cards)
+   ============================ */
+
+/* Full-bleed helper: lets a section escape the page padding on small screens.
+   Usage: wrap a section in <div class="edge-mobile"> ... </div> */
+@media (max-width: 640px){
+  .edge-mobile{ margin-left:-1rem; margin-right:-1rem; }
+  /* If you still want inner padding after full-bleed: add edge-mobile-pad too */
+  .edge-mobile-pad{ padding-left:1rem; padding-right:1rem; }
+}
+
+/* Denser card look on phones: smaller radius, softer border/shadow, tighter padding */
+@media (max-width: 640px){
+  .card, .tiler-card{
+    border-radius:12px;
+    border:1px solid #eef2f7;       /* lighter */
+    box-shadow:0 4px 10px rgba(0,0,0,.04);
+    padding:12px;
+    margin:12px 0;
+  }
+  .chip-tight{ padding:4px 10px; font-size:11px; } /* for small chips/badges */
+  .gap-tight{ gap:.5rem; }                         /* optional smaller gaps */
+}
