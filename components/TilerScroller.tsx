@@ -1,12 +1,11 @@
 import Image from 'next/image';
-import styles from './TilerScroller.module.css';
 
 export type Tiler = {
   id: string;
   name: string;
   location: string;
-  rating: number;         // 0–5
-  jobsCompleted: number;  // show with rating
+  rating: number;
+  jobsCompleted: number;
   avatar: string;
   badges?: string[];
   tags?: string[];
@@ -15,38 +14,62 @@ export type Tiler = {
 };
 
 export default function TilerScroller({ tilers }: { tilers: Tiler[] }) {
+  const stars = (r:number) => '★★★★★☆☆☆☆☆'.slice(5 - Math.round(r), 10 - Math.round(r));
+
   return (
-    <section className={styles.wrap} aria-label="Top tilers">
-      <h2 className={styles.title}>Top Tilers</h2>
-      {tilers.map(t=>(
-        <article key={t.id} className={styles.card}>
-          <div className={styles.avatar}>
-            <Image src={t.avatar} alt={t.name} fill />
+    <section aria-label="Top tilers" className="mt-4">
+      <h2 className="mx-1 mb-2 text-xl font-semibold">Top Tilers</h2>
+
+      {tilers.map(t => (
+        <article key={t.id}
+          className="grid grid-cols-[108px_1fr] gap-4 bg-white border border-slate-200 rounded-2xl shadow-md p-4 my-5">
+          <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-200">
+            <Image src={t.avatar} alt={t.name} fill className="object-cover" />
           </div>
 
-          <div className={styles.main}>
-            <div className={styles.row1}>
-              <h3 className={styles.name}>{t.name}</h3>
-              <div className={styles.rating} aria-label={`${t.rating} stars, ${t.jobsCompleted} jobs completed`}>
-                <span className={styles.stars}>{'★★★★★☆☆☆☆☆'.slice(5 - Math.round(t.rating), 10 - Math.round(t.rating))}</span>
-                <span className={styles.score}>{t.rating.toFixed(1)}</span>
-                <span className={styles.jobs}>{t.jobsCompleted} jobs</span>
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-lg font-semibold">{t.name}</h3>
+              <div className="flex items-center gap-2 text-slate-900" aria-label={`${t.rating} stars, ${t.jobsCompleted} jobs`}>
+                <span className="tracking-[2px] text-sm opacity-75">{stars(t.rating)}</span>
+                <span className="font-extrabold">{t.rating.toFixed(1)}</span>
+                <span className="text-slate-500">{t.jobsCompleted} jobs</span>
               </div>
             </div>
 
-            <div className={styles.meta}>{t.location}</div>
+            <div className="text-slate-500 mt-1 mb-2">{t.location}</div>
 
             {!!t.badges?.length && (
-              <div className={styles.badges}>{t.badges.map(b=><span key={b} className={styles.badge}>{b}</span>)}</div>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {t.badges.map(b => (
+                  <span key={b} className="text-xs font-bold px-3 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
+                    {b}
+                  </span>
+                ))}
+              </div>
             )}
 
             {!!t.tags?.length && (
-              <div className={styles.tags}>{t.tags.map(tag=><span key={tag}>{tag}</span>)}</div>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {t.tags.map(tag => (
+                  <span key={tag} className="text-xs px-3 py-1 rounded-full border border-slate-200 bg-slate-50">
+                    {tag}
+                  </span>
+                ))}
+              </div>
             )}
 
-            <div className={styles.actions}>
-              {t.profileHref && <a className={styles.btnOutline} href={t.profileHref}>View Profile</a>}
-              {t.quoteHref && <a className={styles.btnPrimary} href={t.quoteHref}>Request Quote</a>}
+            <div className="flex flex-wrap gap-2">
+              {t.profileHref && (
+                <a href={t.profileHref} className="px-3 py-2 rounded-xl border border-slate-300">
+                  View Profile
+                </a>
+              )}
+              {t.quoteHref && (
+                <a href={t.quoteHref} className="px-3 py-2 rounded-xl bg-[#003049] text-white font-extrabold">
+                  Request Quote
+                </a>
+              )}
             </div>
           </div>
         </article>

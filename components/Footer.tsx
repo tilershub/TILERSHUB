@@ -1,22 +1,22 @@
 export default function Footer() {
   return (
-    <footer style={{marginTop:24, background:'#0f172a', color:'#e5e7eb'}}>
-      <div style={{maxWidth:1100, margin:'0 auto', padding:16, display:'grid', gap:16, gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))'}}>
+    <footer className="mt-6 bg-slate-950 text-slate-200">
+      <div className="mx-auto max-w-[1100px] px-4 py-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <strong>About</strong>
-          <p>Sri Lanka’s trusted tilers marketplace.</p>
+          <p className="opacity-80">Sri Lanka’s trusted tilers marketplace.</p>
         </div>
         <div>
           <strong>Contact</strong>
-          <p>0774503744 • tilershub.lk • Gampaha</p>
+          <p className="opacity-80">0774503744 • tilershub.lk • Gampaha</p>
         </div>
         <div>
           <strong>Quick Links</strong>
-          <p><a href="/privacy" style={{color:'#cbd5e1'}}>Privacy</a> · <a href="/terms" style={{color:'#cbd5e1'}}>Terms</a></p>
+          <p><a className="text-slate-300" href="/privacy">Privacy</a> · <a className="text-slate-300" href="/terms">Terms</a></p>
         </div>
         <div>
           <strong>Social</strong>
-          <p><a href="#" style={{color:'#cbd5e1'}}>Facebook</a> · <a href="#" style={{color:'#cbd5e1'}}>WhatsApp</a> · <a href="#" style={{color:'#cbd5e1'}}>TikTok</a></p>
+          <p><a className="text-slate-300" href="#">Facebook</a> · <a className="text-slate-300" href="#">WhatsApp</a> · <a className="text-slate-300" href="#">TikTok</a></p>
         </div>
       </div>
     </footer>

@@ -1,6 +1,5 @@
 'use client';
 import Image from 'next/image';
-import styles from './BannerCarousel.module.css';
 import { useRef } from 'react';
 
 export type Promo = {
@@ -14,27 +13,36 @@ export type Promo = {
 
 export default function BannerCarousel({ slides }: { slides: Promo[] }) {
   const scroller = useRef<HTMLDivElement>(null);
-  const snap = (dir:-1|1) => scroller.current?.scrollBy({left:dir*(scroller.current.clientWidth),behavior:'smooth'});
+  const snap = (dir: -1 | 1) =>
+    scroller.current?.scrollBy({ left: dir * (scroller.current.clientWidth), behavior: 'smooth' });
 
   return (
-    <section className={styles.wrap} aria-label="Promotion banners">
-      <div className={styles.scroller} ref={scroller}>
-        {slides.map(s=>(
-          <div key={s.id} className={styles.slide}>
-            <Image src={s.image} alt={s.title ?? 'Promotion'} fill priority />
-            {(s.title||s.subtitle||s.ctaLabel)&&(
-              <div className={styles.overlay}>
-                {s.title && <h2>{s.title}</h2>}
-                {s.subtitle && <p>{s.subtitle}</p>}
-                {s.ctaLabel && s.ctaHref && <a className={styles.cta} href={s.ctaHref}>{s.ctaLabel}</a>}
+    <section className="relative">
+      <div
+        ref={scroller}
+        className="grid grid-flow-col auto-cols-[100%] overflow-x-auto scroll-smooth snap-x snap-mandatory rounded-2xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {slides.map(s => (
+          <div key={s.id} className="relative h-[min(46vw,420px)] snap-start rounded-2xl overflow-hidden bg-slate-100">
+            <Image src={s.image} alt={s.title ?? 'Promotion'} fill priority className="object-cover" />
+            {(s.title || s.subtitle || s.ctaLabel) && (
+              <div className="absolute inset-x-0 bottom-0 p-4 text-white bg-gradient-to-t from-black/50 to-transparent">
+                {s.title && <h2 className="text-[clamp(18px,3vw,28px)] font-semibold">{s.title}</h2>}
+                {s.subtitle && <p className="opacity-90">{s.subtitle}</p>}
+                {s.ctaLabel && s.ctaHref && (
+                  <a href={s.ctaHref} className="inline-block mt-2 bg-white text-slate-900 font-extrabold px-4 py-2 rounded-xl">
+                    {s.ctaLabel}
+                  </a>
+                )}
               </div>
             )}
           </div>
         ))}
       </div>
-      <div className={styles.controls}>
-        <button onClick={()=>snap(-1)} aria-label="Previous">‹</button>
-        <button onClick={()=>snap(1)} aria-label="Next">›</button>
+
+      <div className="absolute right-2 bottom-2 flex gap-2">
+        <button onClick={() => snap(-1)} aria-label="Previous" className="w-9 h-9 rounded-full bg-white shadow-md">‹</button>
+        <button onClick={() => snap(1)} aria-label="Next" className="w-9 h-9 rounded-full bg-white shadow-md">›</button>
       </div>
     </section>
   );
