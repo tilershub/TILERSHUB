@@ -1,7 +1,8 @@
+import Header from '@/components/Header';
 import BannerCarousel, { Promo } from '@/components/BannerCarousel';
 import ServiceScroller, { ServiceBanner } from '@/components/ServiceScroller';
 import TilerScroller, { Tiler } from '@/components/TilerScroller';
-
+import Footer from '@/components/Footer';
 
 const promoSlides: Promo[] = [
   { id:'p1', image:'/img/promo-1.jpg', title:'Certified Pros', subtitle:'Book a master tiler', ctaLabel:'Get an Estimate', ctaHref:'/estimator' },
@@ -24,15 +25,14 @@ const tilers: Tiler[] = [
 
 export default function Home() {
   return (
-    <main style={{background:'#f6f7f9'}}>
+    <main className="bg-slate-50">
+      <Header />
 
-      <div style={{maxWidth:1100, margin:'0 auto', padding:16}}>
+      <div className="mx-auto max-w-[1100px] px-4 py-4">
         <BannerCarousel slides={promoSlides} />
 
-        {/* CTA just under promo */}
-        <div style={{margin:'12px 0'}}>
-          <a href="/estimator"
-             style={{display:'block',textAlign:'center',padding:'14px 18px',borderRadius:12,background:'#003049',color:'#fff',fontWeight:800,textDecoration:'none'}}>
+        <div className="my-3">
+          <a href="/estimator" className="block text-center font-extrabold text-white bg-[#003049] px-5 py-3 rounded-xl">
             Get an Estimate
           </a>
         </div>
@@ -41,6 +41,7 @@ export default function Home() {
         <TilerScroller tilers={tilers} />
       </div>
 
+      <Footer />
     </main>
   );
 }
