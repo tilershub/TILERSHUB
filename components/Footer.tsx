@@ -1,19 +1,24 @@
-export default function Footer(){
+export default function Footer() {
   return (
-    <footer style={{background:'#fff', marginTop:24, borderTop:'1px solid #e5e7eb'}}>
-      <div className="container footer" style={{paddingTop:16, paddingBottom:16}}>
-        <div className="spread">
-          <strong style={{letterSpacing:.3}}>TILERSHUB</strong>
-          <nav className="stack" style={{gridAutoFlow:'column', gap:14}}>
-            <a href="https://tilershub.lk" target="_blank" rel="noreferrer">tilershub.lk</a>
-            <a href="tel:0774503744">0774503744</a>
-            <span style={{color:'var(--muted)'}}>Gampaha</span>
-          </nav>
+    <footer style={{marginTop:24, background:'#0f172a', color:'#e5e7eb'}}>
+      <div style={{maxWidth:1100, margin:'0 auto', padding:16, display:'grid', gap:16, gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))'}}>
+        <div>
+          <strong>About</strong>
+          <p>Sri Lanka’s trusted tilers marketplace.</p>
         </div>
-        <div style={{marginTop:12, color:'var(--muted)'}}>
-          <a href="/about">About</a> &nbsp; <a href="/contact">Contact</a> &nbsp; <a href="/privacy">Privacy</a> &nbsp; <a href="/terms">Terms</a>
+        <div>
+          <strong>Contact</strong>
+          <p>0774503744 • tilershub.lk • Gampaha</p>
+        </div>
+        <div>
+          <strong>Quick Links</strong>
+          <p><a href="/privacy" style={{color:'#cbd5e1'}}>Privacy</a> · <a href="/terms" style={{color:'#cbd5e1'}}>Terms</a></p>
+        </div>
+        <div>
+          <strong>Social</strong>
+          <p><a href="#" style={{color:'#cbd5e1'}}>Facebook</a> · <a href="#" style={{color:'#cbd5e1'}}>WhatsApp</a> · <a href="#" style={{color:'#cbd5e1'}}>TikTok</a></p>
         </div>
       </div>
     </footer>
-  )
+  );
 }
