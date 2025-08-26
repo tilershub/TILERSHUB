@@ -1,28 +1,41 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import styles from './BannerCarousel.module.css';
+import { useRef } from 'react';
 
-type BannerItem = { id?: string|number; href?: string; image_url: string; title?: string; alt?: string; };
+export type Promo = {
+  id: string;
+  image: string;
+  title?: string;
+  subtitle?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+};
 
-export default function BannerCarousel({ items = [] as BannerItem[] }) {
-  const [idx, setIdx] = useState(0);
-  const timerRef = useRef<number | null>(null);
-  const delay = 3500;
-
-  useEffect(() => {
-    if (!items.length || items.length <= 1) return;
-    const start = () => { stop(); timerRef.current = window.setInterval(() => setIdx((i) => (i + 1) % items.length), delay); };
-    const stop = () => { if (timerRef.current) { window.clearInterval(timerRef.current); timerRef.current = null; } };
-    start(); return stop;
-  }, [items.length]);
-
-  if (!items.length) return null;
-  const it = items[idx];
+export default function BannerCarousel({ slides }: { slides: Promo[] }) {
+  const scroller = useRef<HTMLDivElement>(null);
+  const snap = (dir:-1|1) => scroller.current?.scrollBy({left:dir*(scroller.current.clientWidth),behavior:'smooth'});
 
   return (
-    <section className="banner-carousel" role="region" aria-roledescription="carousel" aria-label="Promotions">
-      <a className="banner-slide" href={it.href ?? '#'} aria-label={it.title ?? 'Advertisement'}>
-        <img src={it.image_url} alt={it.alt ?? it.title ?? 'Advertisement'} />
-      </a>
+    <section className={styles.wrap} aria-label="Promotion banners">
+      <div className={styles.scroller} ref={scroller}>
+        {slides.map(s=>(
+          <div key={s.id} className={styles.slide}>
+            <Image src={s.image} alt={s.title ?? 'Promotion'} fill priority />
+            {(s.title||s.subtitle||s.ctaLabel)&&(
+              <div className={styles.overlay}>
+                {s.title && <h2>{s.title}</h2>}
+                {s.subtitle && <p>{s.subtitle}</p>}
+                {s.ctaLabel && s.ctaHref && <a className={styles.cta} href={s.ctaHref}>{s.ctaLabel}</a>}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className={styles.controls}>
+        <button onClick={()=>snap(-1)} aria-label="Previous">‹</button>
+        <button onClick={()=>snap(1)} aria-label="Next">›</button>
+      </div>
     </section>
   );
 }
