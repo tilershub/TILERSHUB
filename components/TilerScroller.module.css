@@ -1,0 +1,22 @@
+.wrap{margin-top:14px}
+.title{margin:18px 4px 8px}
+.card{
+  display:grid;grid-template-columns:108px 1fr;gap:16px;background:#fff;
+  border:1px solid #e9eef4;border-radius:16px;box-shadow:0 10px 22px rgba(0,0,0,.05);
+  padding:14px;margin:18px 0; /* generous spacing between cards */
+}
+.avatar{position:relative;width:100%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#dfe6ee}
+.name{margin:0;font-size:18px}
+.row1{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.rating{display:flex;align-items:center;gap:8px}
+.stars{letter-spacing:2px;font-size:14px;opacity:.75}
+.score{font-weight:800}
+.jobs{color:#6b7a90}
+.meta{color:#6b7a90;margin:6px 0 8px}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{font-size:12px;font-weight:700;padding:6px 10px;border-radius:999px;background:#eef5ff;border:1px solid #d7e6ff;color:#0b3a74}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.tags span{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #e6edf5;background:#f6f9fc}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btnOutline{padding:10px 12px;border-radius:10px;border:1px solid #cfd8e3;text-decoration:none;color:#0e1b2a}
+.btnPrimary{padding:10px 12px;border-radius:10px;text-decoration:none;color:#fff;background:#003049;font-weight:800}
