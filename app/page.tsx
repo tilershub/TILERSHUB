@@ -1,8 +1,7 @@
-import Header from '@/components/Header';
 import BannerCarousel, { Promo } from '@/components/BannerCarousel';
 import ServiceScroller, { ServiceBanner } from '@/components/ServiceScroller';
 import TilerScroller, { Tiler } from '@/components/TilerScroller';
-import Footer from '@/components/Footer';
+
 
 const promoSlides: Promo[] = [
   { id:'p1', image:'/img/promo-1.jpg', title:'Certified Pros', subtitle:'Book a master tiler', ctaLabel:'Get an Estimate', ctaHref:'/estimator' },
@@ -26,7 +25,6 @@ const tilers: Tiler[] = [
 export default function Home() {
   return (
     <main className="bg-slate-50">
-      <Header />
 
       <div className="mx-auto max-w-[1100px] px-4 py-4">
         <BannerCarousel slides={promoSlides} />
@@ -40,8 +38,6 @@ export default function Home() {
         <ServiceScroller services={serviceBanners} />
         <TilerScroller tilers={tilers} />
       </div>
-
-      <Footer />
     </main>
   );
 }
