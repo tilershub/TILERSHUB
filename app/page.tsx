@@ -1,8 +1,7 @@
-import Header from '@/components/Header';
 import BannerCarousel, { Promo } from '@/components/BannerCarousel';
 import ServiceScroller, { ServiceBanner } from '@/components/ServiceScroller';
 import TilerScroller, { Tiler } from '@/components/TilerScroller';
-import Footer from '@/components/Footer';
+
 
 const promoSlides: Promo[] = [
   { id:'p1', image:'/img/promo-1.jpg', title:'Certified Pros', subtitle:'Book a master tiler', ctaLabel:'Get an Estimate', ctaHref:'/estimator' },
@@ -26,7 +25,6 @@ const tilers: Tiler[] = [
 export default function Home() {
   return (
     <main style={{background:'#f6f7f9'}}>
-      <Header />
 
       <div style={{maxWidth:1100, margin:'0 auto', padding:16}}>
         <BannerCarousel slides={promoSlides} />
@@ -43,7 +41,6 @@ export default function Home() {
         <TilerScroller tilers={tilers} />
       </div>
 
-      <Footer />
     </main>
   );
 }
