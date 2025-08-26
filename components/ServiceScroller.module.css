@@ -1,0 +1,9 @@
+.wrap{position:relative;margin-top:14px}
+.scroller{display:grid;grid-auto-flow:column;grid-auto-columns:100%;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;border-radius:16px;scrollbar-width:none}
+.scroller::-webkit-scrollbar{display:none}
+.card{position:relative;height:min(40vw,360px);display:block;border-radius:16px;overflow:hidden;background:#e8edf4;scroll-snap-align:start}
+.overlay{position:absolute;inset:auto 0 0 0;padding:16px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.45));color:#fff}
+.overlay h3{margin:0 0 4px;font-size:clamp(18px,2.6vw,24px)}
+.overlay p{margin:0;opacity:.9}
+.controls{position:absolute;inset:auto 10px 10px auto;display:flex;gap:8px}
+.controls button{width:36px;height:36px;border-radius:50%;border:0;background:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);font-size:18px}
